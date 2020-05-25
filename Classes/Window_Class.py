@@ -13,7 +13,7 @@ class NewWindow:
         """
         self.window = Toplevel()
         self.window.title(title)
-        self.window.iconbitmap('..Statblocks/Icon.ico')
+        self.window.iconbitmap('Statblocks/Icon.ico')
         self.window.geometry('430x240')
 
         self.statblock_file_l = NONE
@@ -169,7 +169,7 @@ class NewWindow:
             self.statblock_file_l.grid_forget()
             self.statblock_file_l = NONE
 
-        self.statblock_file = filedialog.askopenfilename(initialdir='../Statblocks/' + title,
+        self.statblock_file = filedialog.askopenfilename(initialdir='Statblocks/' + title,
                                                          title='select a file',
                                                          filetypes=(('png files', '*.png'),
                                                                     ('all files', '*.*')))
@@ -186,7 +186,7 @@ class NewWindow:
             if int(label.grid_info()['row']) == 1:
                 label.grid_forget()
 
-        conn = sqlite3.connect('../Database/creatures.db')
+        conn = sqlite3.connect('Database/creatures.db')
         cursor = conn.cursor()
         cursor.execute('Select * FROM ' + table)
         self.records = cursor.fetchall()
@@ -206,7 +206,7 @@ class NewWindow:
 
 
     def submit(self, table):
-        conn = sqlite3.connect('../Database/creatures.db')
+        conn = sqlite3.connect('Database/creatures.db')
         cursor = conn.cursor()
         cursor.execute('INSERT INTO ' + table + ' VALUES' + '(:id,'
                                                           + ':name,'
@@ -247,7 +247,7 @@ class NewWindow:
 
 
     def delete(self, table):
-        conn = sqlite3.connect('../Database/creatures.db')
+        conn = sqlite3.connect('Database/creatures.db')
         cursor = conn.cursor()
 
         cursor.execute('DELETE from ' + table + ' WHERE rowid = ' + self.id.get())
@@ -258,7 +258,7 @@ class NewWindow:
 
 
     def edit(self, table):
-        conn = sqlite3.connect('../Database/creatures.db')
+        conn = sqlite3.connect('Database/creatures.db')
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM ' + table + ' WHERE rowid = ' + self.id.get())
         self.records = cursor.fetchall()
@@ -297,7 +297,7 @@ class NewWindow:
 
 
     def save(self, table):
-        conn = sqlite3.connect('../Database/creatures.db')
+        conn = sqlite3.connect('Database/creatures.db')
         cursor = conn.cursor()
         cursor.execute('UPDATE ' + table + ' SET ' + '''id = :id,
                                                        name = :name,
