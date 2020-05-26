@@ -1,6 +1,7 @@
 from tkinter import *
 import os
 import sqlite3
+
 class NewWindow:
 
     def __init__(self, title, type, table):
@@ -9,7 +10,6 @@ class NewWindow:
             -title: the window's title, also used to locate a folder
             -type: used to show the right word on buttons
             -table: used to specify the Database table to edit
-
         """
         self.window = Toplevel()
         self.window.title(title)
