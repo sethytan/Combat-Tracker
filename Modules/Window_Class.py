@@ -4,7 +4,7 @@ import sqlite3
 
 class NewWindow:
 
-    def __init__(self, title, type, table):
+    def __init__(self, title, type, table, dropdowns):
         """Initialise new window object.
             Arguments:
             -title: the window's title, also used to locate a folder
@@ -15,6 +15,7 @@ class NewWindow:
         self.window.title(title)
         self.window.iconbitmap('Statblocks/Icon.ico')
         self.window.geometry('430x240')
+        self.window.focus_force()
 
         self.statblock_file_l = NONE
 
@@ -121,7 +122,7 @@ class NewWindow:
 
         self.add_b = Button(self.button_frame,
                           text='Add ' + type + ' to Database',
-                          command=lambda: self.submit(table))
+                          command=lambda: self.submit(table, dropdowns, type))
         self.add_b.grid(row=0, column=0,
                       columnspan=2, rowspan=2,
                       padx=(5, 5), pady=5,
@@ -136,7 +137,7 @@ class NewWindow:
 
         self.delete_b = Button(self.button_frame,
                              text='Delete ' + type + ' from Database',
-                             command=lambda: self.delete(table))
+                             command=lambda: self.delete(table, dropdowns, type))
         self.delete_b.grid(row=2, column=0,
                          columnspan=2, rowspan=2,
                          padx=(5, 5), ipady=15, sticky=W)
@@ -149,7 +150,7 @@ class NewWindow:
 
         self.save_b = Button(self.button_frame,
                            text='Save Changes',
-                           command=lambda: self.save(table),
+                           command=lambda: self.save(table, dropdowns, type),
                            state=DISABLED)
         self.save_b.grid(row=2, column=2,
                        columnspan=2, ipadx=10)
@@ -174,9 +175,9 @@ class NewWindow:
                                                          filetypes=(('png files', '*.png'),
                                                                     ('all files', '*.*')))
         self.window.lift()
-
+        self.path = os.path.relpath(self.statblock_file, os.getcwd())
         self.statblock_file_l = Label(self.input_frame,
-                                      text=os.path.basename(self.statblock_file))
+                                      text=os.path.basename(self.path))
         self.statblock_file_l.grid(row=2, column=3, columnspan=3,
                                    padx=(0, 15), pady=(0, 5))
 
@@ -205,7 +206,7 @@ class NewWindow:
         conn.close()
 
 
-    def submit(self, table):
+    def submit(self, table, dropdowns, type):
         conn = sqlite3.connect('Database/creatures.db')
         cursor = conn.cursor()
         cursor.execute('INSERT INTO ' + table + ' VALUES' + '(:id,'
@@ -238,15 +239,20 @@ class NewWindow:
                     'spell_7': self.spell_7.get(),
                     'spell_8': self.spell_8.get(),
                     'spell_9': self.spell_9.get(),
-                    'statblock': self.statblock_file
+                    'statblock': self.path
                 })
 
         conn.commit()
         conn.close()
         self.wipe_entry()
+        for dropdown in dropdowns:
+            print(dropdown.table)
+            if dropdown.table == table:
+                dropdown.call_creatures(table, type)
+                dropdown.callback()
 
 
-    def delete(self, table):
+    def delete(self, table, dropdowns, type):
         conn = sqlite3.connect('Database/creatures.db')
         cursor = conn.cursor()
 
@@ -255,6 +261,10 @@ class NewWindow:
         conn.commit()
         conn.close()
         self.id.delete(0, END)
+        for dropdown in dropdowns:
+            if dropdown.table == table:
+                dropdown.call_creatures(table, type)
+                dropdown.callback()
 
 
     def edit(self, table):
@@ -280,8 +290,8 @@ class NewWindow:
             self.spell_8.insert(0, record[12])
             self.spell_9.insert(0, record[13])
 
-            self.statblock_file = record[14]
-            self.statblock_file_l = Label(self.input_frame, text=os.path.basename(self.statblock_file))
+            self.path = record[14]
+            self.statblock_file_l = Label(self.input_frame, text=os.path.basename(self.path))
             self.statblock_file_l.grid(row=2, column=3, columnspan=3,
                                        padx=(0, 15), pady=(0, 5))
 
@@ -296,7 +306,7 @@ class NewWindow:
         conn.close()
 
 
-    def save(self, table):
+    def save(self, table, dropdowns, type):
         conn = sqlite3.connect('Database/creatures.db')
         cursor = conn.cursor()
         cursor.execute('UPDATE ' + table + ' SET ' + '''id = :id,
@@ -331,7 +341,7 @@ class NewWindow:
                 'spell_7': self.spell_7.get(),
                 'spell_8': self.spell_8.get(),
                 'spell_9': self.spell_9.get(),
-                'statblock': self.statblock_file
+                'statblock': self.path
 
             })
         conn.commit()
@@ -345,6 +355,10 @@ class NewWindow:
             self.delete_b['state'] = NORMAL
             self.edit_b['state'] = NORMAL
         self.wipe_entry()
+        for dropdown in dropdowns:
+            if dropdown.table == table:
+                dropdown.call_creatures(table, type)
+                dropdown.callback()
 
 
     def cancel(self):
